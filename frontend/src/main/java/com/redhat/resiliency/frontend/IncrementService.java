@@ -1,50 +1,36 @@
 package com.redhat.resiliency.frontend;
 
-import io.quarkus.redis.datasource.ReactiveRedisDataSource;
-import io.quarkus.redis.datasource.RedisDataSource;
-import io.quarkus.redis.datasource.keys.ReactiveKeyCommands;
-import io.quarkus.redis.datasource.string.StringCommands;
-import io.smallrye.mutiny.Uni;
-
 import java.util.List;
 
-import jakarta.inject.Singleton;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-@Singleton
-class IncrementService {
+import io.smallrye.mutiny.Uni;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
 
+@Path("/increments")
+@RegisterRestClient(configKey = "backend")
+public interface IncrementService {
 
-    
-    private ReactiveKeyCommands<String> keys;
-    private StringCommands<String, Integer> counter;
+    @GET
+    public Uni<List<String>> keys();
 
-    public IncrementService(RedisDataSource redisDS,  ReactiveRedisDataSource reactiveRedisDS) {
-        keys = reactiveRedisDS.key();
-        counter = redisDS.string(Integer.class);
-    }
+    @POST
+    public Increment create(Increment increment);
 
+    @GET
+    @Path("/{key}")
+    public Increment get(String key);
 
-    Uni<Void> del(String key) {
-        return keys.del(key)
-            .replaceWithVoid();
-            
-    }
+    @PUT
+    @Path("/{key}")
+    public void increment(String key, Integer value);
 
-    int get(String key) {
-        return counter.get(key);
-    }
-
-    void set(String key, int value) {
-        counter.set(key, value);
-    }
-
-    void increment(String key, int incrementBy) {
-        counter.incrby(key, incrementBy);
-    }
-
-    Uni<List<String>> keys() {
-        return keys
-                .keys("*");
-    }
+    @DELETE
+    @Path("/{key}")
+    public Uni<Void> delete(String key);
 }
 

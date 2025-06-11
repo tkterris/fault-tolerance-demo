@@ -32,6 +32,8 @@ objects:
           env:
           - name: REDIS_PASSWORD
             value: store_in_secret
+          - name: REDIS_RDB_POLICY_DISABLED
+            value: 'yes'
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -171,6 +173,124 @@ objects:
     to:
       kind: Service
       name: backend
+      weight: 100
+    tls:
+      termination: edge
+    wildcardPolicy: None
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: frontend
+      app.kubernetes.io/component: frontend
+      app.kubernetes.io/instance: frontend
+    name: frontend
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: frontend
+      app.kubernetes.io/component: frontend
+      app.kubernetes.io/instance: frontend
+    name: frontend
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: frontend:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        uri: https://github.com/tkterris/application-resiliency-demo.git
+        ref: main
+      contextDir: frontend
+    strategy:
+      dockerStrategy:
+        dockerfilePath: src/main/docker/Dockerfile
+        from:
+          kind: DockerImage
+          name: quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"frontend:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"frontend\")].image"}]'
+    labels:
+      app: frontend
+      app.kubernetes.io/component: frontend
+      app.kubernetes.io/instance: frontend
+    name: frontend
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        deployment: frontend
+    template:
+      metadata:
+        annotations:
+        labels:
+          deployment: frontend
+      spec:
+        containers:
+        - image: frontend:latest
+          name: frontend
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          env:
+          - name: QUARKUS_REDIS_PASSWORD
+            value: store_in_secret
+          command: [ "/bin/sh", "-c", "./application", "-Dquarkus.http.host=0.0.0.0" ]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: frontend
+      app.kubernetes.io/component: frontend
+      app.kubernetes.io/instance: frontend
+    name: frontend
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deployment: frontend
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    labels:
+      app: frontend
+      app.kubernetes.io/component: frontend
+      app.kubernetes.io/instance: frontend
+    name: frontend
+  spec:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: frontend
       weight: 100
     tls:
       termination: edge

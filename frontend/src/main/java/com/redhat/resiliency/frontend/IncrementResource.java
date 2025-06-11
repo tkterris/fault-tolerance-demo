@@ -2,7 +2,8 @@ package com.redhat.resiliency.frontend;
 
 import java.util.List;
 
-import jakarta.inject.Inject;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -14,7 +15,7 @@ import io.smallrye.mutiny.Uni;
 @Path("/increments")
 public class IncrementResource {
 
-    @Inject
+    @RestClient
     IncrementService service;
 
     @GET
@@ -24,14 +25,13 @@ public class IncrementResource {
 
     @POST
     public Increment create(Increment increment) {
-        service.set(increment.key, increment.value);
-        return increment;
+        return service.create(increment);
     }
 
     @GET
     @Path("/{key}")
     public Increment get(String key) {
-        return new Increment(key, service.get(key));
+        return service.get(key);
     }
 
     @PUT
@@ -43,6 +43,6 @@ public class IncrementResource {
     @DELETE
     @Path("/{key}")
     public Uni<Void> delete(String key) {
-        return service.del(key);
+        return service.delete(key);
     }
 }
