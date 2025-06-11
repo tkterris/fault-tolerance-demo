@@ -1,0 +1,179 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: app-resiliency-template
+  apiVersion: v1
+objects:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: db
+      app.kubernetes.io/component: db
+      app.kubernetes.io/instance: db
+    name: db
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        deployment: db
+    template:
+      metadata:
+        annotations:
+        labels:
+          deployment: db
+      spec:
+        containers:
+        - image: redis:latest
+          name: db
+          ports:
+          - containerPort: 6379
+            protocol: TCP
+          env:
+          - name: REDIS_PASSWORD
+            value: store_in_secret
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: db
+      app.kubernetes.io/component: db
+      app.kubernetes.io/instance: db
+    name: db
+  spec:
+    ports:
+    - name: 6379-tcp
+      port: 6379
+      protocol: TCP
+      targetPort: 6379
+    selector:
+      deployment: db
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: backend
+      app.kubernetes.io/component: backend
+      app.kubernetes.io/instance: backend
+    name: backend
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: backend
+      app.kubernetes.io/component: backend
+      app.kubernetes.io/instance: backend
+    name: backend
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: backend:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        uri: https://github.com/tkterris/application-resiliency-demo.git
+        ref: main
+      type: Git
+    strategy:
+      dockerStrategy:
+        dockerfilePath: src/main/docker/Dockerfile
+        from:
+          kind: DockerImage
+          name: quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21
+      type: Source
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"backend:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"backend\")].image"}]'
+    labels:
+      app: backend
+      app.kubernetes.io/component: backend
+      app.kubernetes.io/instance: backend
+    name: backend
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        deployment: backend
+    template:
+      metadata:
+        annotations:
+        labels:
+          deployment: backend
+      spec:
+        containers:
+        - image: backend:latest
+          name: backend
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          env:
+          - name: QUARKUS_REDIS_PASSWORD
+            value: store_in_secret
+          command: [ "/bin/sh", "-c", "./application", "-Dquarkus.http.host=0.0.0.0" ]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: backend
+      app.kubernetes.io/component: backend
+      app.kubernetes.io/instance: backend
+    name: backend
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deployment: backend
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    labels:
+      app: backend
+      app.kubernetes.io/component: backend
+      app.kubernetes.io/instance: backend
+    name: backend
+  spec:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: backend
+      weight: 100
+    tls:
+      termination: edge
+    wildcardPolicy: None
+
