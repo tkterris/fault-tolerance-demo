@@ -11,7 +11,7 @@ RUN ./mvnw package -Dnative -DskipTests=true
 
 ## Stage 2 : create the docker final image
 FROM quay.io/quarkus/ubi9-quarkus-micro-image:2.0
-COPY --from=build --chown=1001:1001 --chmod=777 /code/backend/target/*-runner /work/application
+COPY --from=build --chown=1001:1001 --chmod=777 /code/target/*-runner /work/application
 RUN chmod -R 777 /work
 
 USER 1001

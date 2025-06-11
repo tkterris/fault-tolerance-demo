@@ -88,14 +88,13 @@ objects:
       git:
         uri: https://github.com/tkterris/application-resiliency-demo.git
         ref: main
-      type: Git
+      contextDir: backend
     strategy:
       dockerStrategy:
-        dockerfilePath: backend/src/main/docker/Dockerfile
+        dockerfilePath: src/main/docker/Dockerfile
         from:
           kind: DockerImage
           name: quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21
-      type: Source
     triggers:
     - type: ConfigChange
     - imageChange: {}
