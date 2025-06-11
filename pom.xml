@@ -9,7 +9,9 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>shared-libs</module>
         <module>backend</module>
+        <module>frontend</module>
     </modules>
 
     <build>

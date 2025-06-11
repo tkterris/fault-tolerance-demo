@@ -1,4 +1,4 @@
-package org.acme.redis;
+package com.redhat.resiliency.backend;
 
 import static org.hamcrest.Matchers.is;
 

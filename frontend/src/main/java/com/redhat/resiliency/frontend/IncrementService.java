@@ -1,4 +1,4 @@
-package org.acme.redis;
+package com.redhat.resiliency.frontend;
 
 import io.quarkus.redis.datasource.ReactiveRedisDataSource;
 import io.quarkus.redis.datasource.RedisDataSource;

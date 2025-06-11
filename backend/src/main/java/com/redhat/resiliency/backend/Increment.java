@@ -1,4 +1,4 @@
-package org.acme.redis;
+package com.redhat.resiliency.backend;
 
 public class Increment {
     public String key;

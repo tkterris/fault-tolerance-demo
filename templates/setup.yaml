@@ -91,7 +91,7 @@ objects:
       type: Git
     strategy:
       dockerStrategy:
-        dockerfilePath: src/main/docker/Dockerfile
+        dockerfilePath: backend/src/main/docker/Dockerfile
         from:
           kind: DockerImage
           name: quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21
