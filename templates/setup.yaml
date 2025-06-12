@@ -4,6 +4,16 @@ metadata:
   name: app-resiliency-template
   apiVersion: v1
 objects:
+# TODO: Don't put Secrets in source control! They should be managed by Hashicorp Vault, etc
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: redis-secret
+    labels:
+      app: infinispan-helm
+  type: Opaque
+  stringData:
+    REDIS_PW: my_password_here
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -32,7 +42,10 @@ objects:
             protocol: TCP
           env:
           - name: REDIS_PASSWORD
-            value: store_in_secret
+            valueFrom: 
+              secretKeyRef:
+                name: redis-secret
+                key: REDIS_PW
           - name: REDIS_RDB_POLICY_DISABLED
             value: 'yes'
           startupProbe:
@@ -145,7 +158,10 @@ objects:
             protocol: TCP
           env:
           - name: QUARKUS_REDIS_PASSWORD
-            value: store_in_secret
+            valueFrom: 
+              secretKeyRef:
+                name: redis-secret
+                key: REDIS_PW
           command: [ "/bin/sh", "-c", "./application", "-Dquarkus.http.host=0.0.0.0" ]
           startupProbe:
             httpGet:

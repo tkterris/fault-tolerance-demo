@@ -1,20 +1,19 @@
 package com.redhat.resiliency.frontend;
 
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
-
-import io.smallrye.mutiny.Uni;
 
 @Path("/increments")
 public class IncrementResource {
@@ -30,7 +29,7 @@ public class IncrementResource {
     }
     
     Uni<List<String>> keysFallback() {
-    	return Uni.createFrom().item((List<String>) new ArrayList<String>());
+    	return Uni.createFrom().item(Arrays.asList("dummy response"));
     }
 
     @POST
