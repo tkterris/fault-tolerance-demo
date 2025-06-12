@@ -1,7 +1,11 @@
 package com.redhat.resiliency.frontend;
 
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import jakarta.ws.rs.DELETE;
@@ -19,8 +23,14 @@ public class IncrementResource {
     IncrementService service;
 
     @GET
+    @Timeout(unit = ChronoUnit.MILLIS, value = 500)
+    @Fallback(fallbackMethod = "keysFallback")
     public Uni<List<String>> keys() {
         return service.keys();
+    }
+    
+    Uni<List<String>> keysFallback() {
+    	return Uni.createFrom().item((List<String>) new ArrayList<String>());
     }
 
     @POST

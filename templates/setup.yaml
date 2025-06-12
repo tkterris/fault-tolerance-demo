@@ -23,6 +23,7 @@ objects:
         labels:
           deployment: db
       spec:
+        terminationGracePeriodSeconds: 0
         containers:
         - image: redis:latest
           name: db
@@ -38,10 +39,16 @@ objects:
             tcpSocket:
               port: 6379
             periodSeconds: 1
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 30
           readinessProbe:
             tcpSocket:
               port: 6379
             periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 1
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -145,16 +152,25 @@ objects:
               port: 8080
               path: /q/health/started
             periodSeconds: 1
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               port: 8080
               path: /q/health/ready
             periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 1
           livenessProbe:
             httpGet:
               port: 8080
               path: /q/health/live
             periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 1
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -278,16 +294,25 @@ objects:
               port: 8080
               path: /q/health/started
             periodSeconds: 1
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               port: 8080
               path: /q/health/ready
             periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 1
           livenessProbe:
             httpGet:
               port: 8080
               path: /q/health/live
             periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 1
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
