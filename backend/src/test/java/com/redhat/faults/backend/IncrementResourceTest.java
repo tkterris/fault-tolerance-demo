@@ -1,4 +1,4 @@
-package com.redhat.resiliency.backend;
+package com.redhat.faults.backend;
 
 import static org.hamcrest.Matchers.is;
 

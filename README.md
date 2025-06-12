@@ -1,7 +1,7 @@
 
-# Application Resiliency Demo
+# Fault Tolerance Demo
 
-This project demonstrates some features that can be used to ensure application resiliency in containerized, cloud-native applications.
+This project demonstrates some features that can be used to ensure fault tolerance in containerized, cloud-native applications.
 
 This repository was cloned from [quarkusio/quarkus-quickstarts](https://github.com/quarkusio/quarkus-quickstarts).
 
@@ -37,14 +37,14 @@ oc login -u developer https://api.crc.testing:6443
 ```
 - Create the project and project resources:
 ```
-oc new-project app-resiliency-demo
+oc new-project fault-tolerance-demo
 oc process -f templates/setup.yaml | oc apply -f -
 ```
 
 This will perform a Quarkus native build, and deploy the three components to your OpenShift cluster. `frontend` and `backend` will be exposed
 via Routes, e.g.:
-- <https://frontend-app-resiliency-demo.apps-crc.testing>
-- <https://backend-app-resiliency-demo.apps-crc.testing>
+- <https://frontend-fault-tolerance-demo.apps-crc.testing>
+- <https://backend-fault-tolerance-demo.apps-crc.testing>
 
 ### Testing
 
@@ -52,13 +52,13 @@ via Routes, e.g.:
 
 When the applications are running, you can navigate to the Swagger UIs in order to check their REST API:
 
-- <https://frontend-app-resiliency-demo.apps-crc.testing/q/swagger-ui/>
-- <https://backend-app-resiliency-demo.apps-crc.testing/q/swagger-ui/>
+- <https://frontend-fault-tolerance-demo.apps-crc.testing/q/swagger-ui/>
+- <https://backend-fault-tolerance-demo.apps-crc.testing/q/swagger-ui/>
 
 You can also observe their health check endpoints, implemented via SmallRye Health (an implementation of MicroProfile Health):
 
-- <https://frontend-app-resiliency-demo.apps-crc.testing/q/health/>
-- <https://backend-app-resiliency-demo.apps-crc.testing/q/health/>
+- <https://frontend-fault-tolerance-demo.apps-crc.testing/q/health/>
+- <https://backend-fault-tolerance-demo.apps-crc.testing/q/health/>
 
 #### Simulating Failures
 
@@ -96,7 +96,7 @@ oc patch deployment db -p '{"spec": {"replicas": 1}}'
 The project can be deleted with:
 
 ```
-oc delete project app-resiliency-demo
+oc delete project fault-tolerance-demo
 ```
 
 ### Links

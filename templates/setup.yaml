@@ -1,7 +1,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: app-resiliency-template
+  name: fault-tolerance-template
   apiVersion: v1
 objects:
 # TODO: Don't put Secrets in source control! They should be managed by Hashicorp Vault, etc
@@ -116,7 +116,7 @@ objects:
     resources: {}
     source:
       git:
-        uri: https://github.com/tkterris/application-resiliency-demo.git
+        uri: https://github.com/tkterris/fault-tolerance-demo.git
         ref: main
       contextDir: backend
     strategy:
@@ -261,7 +261,7 @@ objects:
     resources: {}
     source:
       git:
-        uri: https://github.com/tkterris/application-resiliency-demo.git
+        uri: https://github.com/tkterris/fault-tolerance-demo.git
         ref: main
       contextDir: frontend
     strategy:

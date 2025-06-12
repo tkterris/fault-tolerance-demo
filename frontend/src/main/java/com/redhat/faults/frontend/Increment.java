@@ -1,4 +1,4 @@
-package com.redhat.resiliency.backend;
+package com.redhat.faults.frontend;
 
 public class Increment {
     public String key;

@@ -1,4 +1,4 @@
-package com.redhat.resiliency.backend;
+package com.redhat.faults.backend;
 
 import io.quarkus.redis.datasource.ReactiveRedisDataSource;
 import io.quarkus.redis.datasource.RedisDataSource;

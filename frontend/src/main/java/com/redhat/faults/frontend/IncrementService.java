@@ -1,4 +1,4 @@
-package com.redhat.resiliency.frontend;
+package com.redhat.faults.frontend;
 
 import java.util.List;
 
